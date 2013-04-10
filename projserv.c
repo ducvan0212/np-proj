@@ -102,12 +102,12 @@ int main(int argc, char **argv)
                 }
                 if (buf[0] == 'n') {
                   Writen(sockfd, m_not_continue, strlen(m_not_continue)+1);
-                  // gui den client q de quit
+                  // gui den client q de ngat ket noi
                 }
                 question_counter++;
                 reset_player_answers(player_anwsers, TOTAL_PLAYERS+4);
               } else {
-              //  thong bao sai, dung choi
+              //  thong bao sai, dung choi, ngat ket noi
               }              
               Writen(sockfd, questions[question_counter], strlen(questions[question_counter])+1);
             }
