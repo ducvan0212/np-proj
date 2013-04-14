@@ -37,11 +37,6 @@ void cli_process(FILE *fp, int sockfd)
       continue;
     }
 
-    if ((int)sendline[0] == (int)'n') {
-      printf("Get ready by press \'y\' ");;
-      continue;        
-    }
-
     send(sockfd, sendline, strlen(sendline), 0);
 
     recv_bytes = recv(sockfd, recvline, MAXLINE, 0);

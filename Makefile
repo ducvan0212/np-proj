@@ -66,6 +66,9 @@ tsigpipe:	tsigpipe.o
 projcli:	projcli.o
 		${CC} ${CFLAGS} -o $@ projcli.o ${LIBS}
 
+projcli1:	projcli1.o
+		${CC} ${CFLAGS} -o $@ projcli1.o ${LIBS}
+
 projserv:	projserv.o sigchldwaitpid.o
 		${CC} ${CFLAGS} -o $@ projserv.o sigchldwaitpid.o ${LIBS}
 
