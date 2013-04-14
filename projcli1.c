@@ -1,7 +1,8 @@
 #include  "unp.h"
 
 void cli_process(FILE *fp, int sockfd);
-int check_user_input(char *input, int len);
+int is_valided_input(char *input, int len);
+void print_recv_message(int sockfd, char *recvline, int len);
 
 int main(int argc, char **argv)
 {
@@ -29,31 +30,45 @@ void cli_process(FILE *fp, int sockfd)
 {
   char  sendline[MAXLINE], recvline[MAXLINE];
   int recv_bytes = 0;
+  // int received_question = 0;
+
+  send(sockfd, "m", 3, 0);
+  recv(sockfd, recvline, MAXLINE, 0);
 
   printf("Are you ready? (y/n) ");
   while (Fgets(sendline, MAXLINE, fp) != NULL) {
-    if (!check_user_input(sendline, MAXLINE)) {
+    if (!is_valided_input(sendline, MAXLINE)) {
       printf("Invalid input, choice again\nYour choice: ");;
       continue;
     }
+
+    // if ((received_question == 0) && ((int)sendline[0] >= (int)'a') && ((int)sendline[0] <= (int)'d')) {
+    //   printf("Get ready by press y");;
+    //   continue;        
+    // }
 
     send(sockfd, sendline, strlen(sendline), 0);
 
     recv_bytes = recv(sockfd, recvline, MAXLINE, 0);
     if (recv_bytes == 0) {
       err_quit("str_cli: server terminated prematurely");
-    }
+    } 
+    // else if (recvline[0] == 'c') {
+    //   received_question = 1;
+    // }
     
-    if (is_close_signal(recvline, recv_bytes)) {
-      err_quit("Good bye\n");
-    }
-    printf("%s\nYour anwser: ", recvline);
-    // Fputs(recvline, stdout);
+    print_recv_message(sockfd, recvline, recv_bytes);
+
+    // else if (recvline[0] == 'c') {
+    //   received_question = 1;
+    // }
+
+    printf("Your choice: ");
   }
 }
 
 // 0 is invalid
-int check_user_input(char *input, int len) {
+int is_valided_input(char *input, int len) {
   int input_len = strlen(input);
   if ( input_len != 2) {
     return 0;
@@ -66,9 +81,27 @@ int check_user_input(char *input, int len) {
   return 1;
 }
 
-int is_close_signal(char *recv, int len) {
-  if (recv[0] == 'q') {
-    return 1;
-  } 
-  return 0;
+void print_recv_message(int sockfd, char *recvline, int len) {
+  char *after_anwsering_message = "Waiting for other players. Feel free to change your mind\nSau khi ng choi chinh chon ket qua, an 'y' de tiep tuc";
+  char *get_ready_message = "Get ready by press y";
+  char *main_player_answer_fast_forward = "You must wait for others finish their answer";
+  char *mp_after_anwsering_right_message = "Your answer is right. Next? (y/n) ";
+  char *mp_after_anwsering_wrong_message = "Your answer is wrong. Good bye";
+  char *mp_not_continue = "Good bye";
+
+  if (strcmp(recvline, "aam") == 0) {
+    printf("%s\n", after_anwsering_message);
+  } else if (strcmp(recvline, "grm") == 0) {
+    printf("%s\n", get_ready_message);
+  } else if (strcmp(recvline, "mpaff") == 0) {
+    printf("%s\n", main_player_answer_fast_forward);
+  } else if (strcmp(recvline, "maarm") == 0) {
+    printf("%s\n", mp_after_anwsering_right_message);
+  } else if (strcmp(recvline, "maawm") == 0) {
+    err_quit(mp_after_anwsering_wrong_message);
+  } else if (strcmp(recvline, "mnc") == 0) {
+    err_quit(mp_not_continue);
+  } else {
+    printf("%s\n", recvline);
+  }
 }

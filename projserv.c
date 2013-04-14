@@ -18,6 +18,7 @@ int main(int argc, char **argv)
   socklen_t  clilen;
   struct sockaddr_in cliaddr, servaddr;
 
+  int main_player_sockfd = 0;
   int gameState = ON; // 1 la choi, 0 la nghi
   int counter = 0;
   int question_counter = 0;
@@ -28,9 +29,12 @@ int main(int argc, char **argv)
   char correct_anwsers[3] = {'a', 'b', 'c'};
   char player_anwsers[TOTAL_PLAYERS + 4] = {'0', '0', '0', '0', '0', '0', '0'};
   int remaining_players[TOTAL_PLAYERS + 4] = {0,0,0,0,ON,ON,ON};
-  char *after_anwsering_message = "Waiting for other players. Feel free to change your mind\nSau khi ng choi chinh chon ket qua, an 'y' de tiep tuc\n";
-  char *m_after_anwsering_right_message = "Your answer is right. Next? (y/n) ";
-  char *m_not_continue = "q";
+  char *after_anwsering_message = "aam";
+  char *get_ready_message = "grm";
+  char *main_player_answer_fast_forward = "mpaff";
+  char *mp_after_anwsering_right_message = "maarm";
+  char *mp_after_anwsering_wrong_message = "maawm";
+  char *mp_not_continue = "mnc";
   listenfd = Socket(AF_INET, SOCK_STREAM, 0);
   
   bzero(&servaddr, sizeof(servaddr));
@@ -85,36 +89,50 @@ int main(int argc, char **argv)
           FD_CLR(sockfd, &allset);
           client[i] = -1;
         } else {
+          // processing request
+          printf("%s\n", buf);
+          if (gameState == 0) {
+            Writen(sockfd, mp_not_continue, strlen(mp_not_continue)+1);
+          }
+          if ((main_player_sockfd == 0) && (buf[0] == 'm')) {
+            main_player_sockfd = sockfd;
+            printf("main player connected! Socket: %d\n", main_player_sockfd);
+            send(sockfd, "ok", 3, 0);
+            continue;
+          }
           if (buf[0] == 'y') {
-            // bat dau choi
             Writen(sockfd, questions[question_counter], strlen(questions[question_counter])+1);
+          } else if (buf[0] == 'n') {
+            Writen(sockfd, get_ready_message, strlen(get_ready_message)+1);
           } else {
-            player_anwsers[sockfd] = buf[0];
-            if (number_of_remaining_players(remaining_players, TOTAL_PLAYERS+4) > number_of_anwsers(player_anwsers, TOTAL_PLAYERS+4))
-            {
-              // thay dieu kien if thanh !is_main_player())
-              Writen(sockfd, after_anwsering_message, strlen(after_anwsering_message)+1);
-            } else {
-              // kiem tra so cau tra loi < so ng choi con lai
+            if (is_main_player(sockfd, main_player_sockfd)) {
+              if (number_of_remaining_players(remaining_players, TOTAL_PLAYERS+4) - number_of_anwsers(player_anwsers, TOTAL_PLAYERS+4) > 1) {
+                Writen(sockfd, main_player_answer_fast_forward, strlen(main_player_answer_fast_forward)+1);
+                continue;
+              }
+              player_anwsers[sockfd] = buf[0];
               // neu co ng cung choi chua tra loi, auto tra loi sai, loai
               if (buf[0] == correct_anwsers[question_counter]) {
                 //  chia diem, cong diem
                 //  xu li mang, thong bao 99 nguoi cung choi tra loi dung sai
-                Writen(sockfd, m_after_anwsering_right_message, strlen(m_after_anwsering_right_message)+1);
+                Writen(sockfd, mp_after_anwsering_right_message, strlen(mp_after_anwsering_right_message)+1);
                 if (recv(sockfd, buf, MAXLINE, 0) == 0) {
                   err_quit("str_cli: server terminated prematurely");
                 }
                 if (buf[0] == 'n') {
                   gameState = 0;
-                  // gui den tat ca client q de ngat ket noi
-                  Writen(sockfd, m_not_continue, strlen(m_not_continue)+1);
+                  Writen(sockfd, mp_not_continue, strlen(mp_not_continue)+1);
                 }
                 question_counter++;
                 reset_player_answers(player_anwsers, TOTAL_PLAYERS+4);
               } else {
-              //  thong bao sai, dung choi, ngat ket noi
+                gameState = 0;
+                Writen(sockfd, mp_after_anwsering_wrong_message, strlen(mp_after_anwsering_wrong_message)+1);
               }              
               Writen(sockfd, questions[question_counter], strlen(questions[question_counter])+1);
+            } else {
+              player_anwsers[sockfd] = buf[0];
+              Writen(sockfd, after_anwsering_message, strlen(after_anwsering_message)+1);
             }
           }
 
@@ -158,4 +176,12 @@ void reset_player_answers(char *player_anwsers, int len) {
   int c;
   for (c = 4; c < len; c++) 
     player_anwsers[c] = '0';
+}
+
+int is_main_player(int sockfd, int main_player_sockfd) {
+  if (sockfd == main_player_sockfd)
+  {
+    return 1;
+  }
+  return 0;
 }
