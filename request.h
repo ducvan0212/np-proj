@@ -8,6 +8,9 @@
 //         type 11: nguoi cung choi tra loi sai
 //         type 12: main player chien thang
 //         type 13: main player that bai
+//         type 14: tiep tuc hay dung choi
+//         type 15: main player chu dong dung choi
+
 typedef struct Request_t
 {
   int type;

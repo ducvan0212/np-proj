@@ -5,10 +5,16 @@
 #define OFF 0
 #define ON 1
 
+// TODO
+// kiem tra sendRequest, bao loi hoac gui lai
+// (int)score = score(number of defeated player);
+// phan tro giup, cuu ho
+
 // send mess
 void sendQuestionToAll(int *client, char *message, int len, int number_of_remaining_players);
 void sendWrongAnswerMessage(int *remaining_players, char *player_anwsers, char right_answer, int len);
 void sendMainPlayerFailedMessage(int *remaining_players, int len, char right_answer);
+void sendMainPlayerStopMessage(int *remaining_players, int len, int score);
 
 // print serv log
 void printAllClient(int *client, int len);
@@ -28,16 +34,16 @@ int main(int argc, char **argv)
 {
   int     i, maxi, maxfd, listenfd, connfd, sockfd;
   int     nready, client[FD_SETSIZE];
-  ssize_t n;
+  // ssize_t n;
   fd_set  rset, allset;
-  char    buf[MAXLINE];
+  // char    buf[MAXLINE];
   struct sockaddr_in cliaddr, servaddr;
   socklen_t  clilen = sizeof(cliaddr);
 
   int score = 0;
   int request_counter = 0;
   int main_player_sockfd = 0;
-  int game_state = ON;
+  // int game_state = ON;
   int question_counter = 0;
   char questions[3][100];
   strcpy(questions[0], "cau hoi 1: 1+1=?\na.2\nb.3\nc.4");
@@ -46,7 +52,6 @@ int main(int argc, char **argv)
   char correct_anwsers[3] = {'a', 'b', 'c'};
   char player_anwsers[FD_SETSIZE] = {0};
   int remaining_players[FD_SETSIZE] = {0};
-  int numRemain;
   Request *req;
 
   listenfd = Socket(AF_INET, SOCK_STREAM, 0);
@@ -146,30 +151,31 @@ int main(int argc, char **argv)
                 player_anwsers[sockfd] = req->mess[0];
                 if (req->mess[0] == correct_anwsers[question_counter]) {
                   printf("number of anwsers: %d\n", numberOfAnwsers(player_anwsers, FD_SETSIZE));
-                  printAllPlayerAnswer(player_anwsers, remaining_players, FD_SETSIZE);    
-                  // in diem
+                  printAllPlayerAnswer(player_anwsers, remaining_players, FD_SETSIZE);
                   processPlayerAnswer(remaining_players, player_anwsers, correct_anwsers[question_counter], FD_SETSIZE);
                   sendWrongAnswerMessage(remaining_players, player_anwsers, correct_anwsers[question_counter], FD_SETSIZE);
 
                   if (numberOfRemainingPlayers(remaining_players, FD_SETSIZE) == 1) {
                     // gameState = OFF;
-                    score = 1000000;
+                    score = 50000000;
                     sendRequest(sockfd, 12, "Congratulation! You win", score);
                     break;
                   }
 
-                // thieu mess
-                //   makeNumRemainMessage(numRemain, mess);
-                //   Writen(sockfd, mess, strlen(mess)+1);
-                //   if (recv(sockfd, buf, MAXLINE, 0) == 0) {
-                //     err_quit("str_cli: server terminated prematurely");
-                //   }
-                //   if (buf[0] == 'n') {
-                //     gameState = OFF;
-                //     sendMessageToAll(client, mp_not_continue);
-                //     // exit(0);
-                //     break;
-                //   }
+                  sendRequest(sockfd, 14, "Your anwser is right. Now, you can decide to go further or stop. (y/n) ", 0);
+                  free(req);
+                  req = recvRequest(sockfd);
+                  if (req == NULL) {
+                    err_quit("str_cli: server terminated prematurely");
+                  }
+                  if (req->mess[0] == 'n') {
+                    // gameState = OFF;
+                    score = 100000;
+                    sendMainPlayerStopMessage(remaining_players, FD_SETSIZE, score);
+                    // exit(0);
+                    printf("Game closed!\n");
+                    break;
+                  }
                   question_counter++;
                   request_counter = 0;
                   resetPlayerAnswers(player_anwsers, FD_SETSIZE);
@@ -283,6 +289,16 @@ void sendMainPlayerFailedMessage(int *remaining_players, int len, char right_ans
   for (i = 4; i < len; i++) {
     if (remaining_players[i] == ON) {
       sendRequest(i, 13, "Thank you! Goodbye.", (int)right_answer);
+    }
+  }
+}
+
+void sendMainPlayerStopMessage(int *remaining_players, int len, int score) {
+  int i;
+
+  for (i = 4; i < len; i++) {
+    if (remaining_players[i] == ON) {
+      sendRequest(i, 15, "Thank you! Goodbye.", score);
     }
   }
 }

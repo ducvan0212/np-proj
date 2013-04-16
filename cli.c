@@ -48,23 +48,6 @@ void cliProcess(FILE *fp, int sockfd)
     }
     printf("Submiting... Waiting for others...\n");
     sendRequest(sockfd, 1, sendline, 0);
-
-    // if (!is_valided_input(sendline, MAXLINE)) {
-    //   printf("Invalid input, choice again\nYour choice: ");;
-    //   continue;
-    // }
-
-    // if ((received_question == 0) && ((int)sendline[0] >= (int)'a') && ((int)sendline[0] <= (int)'d')) {
-    //   printf("Get ready by press y\nYour choice: ");;
-    //   continue;        
-    // }
-
-
-
-    // else if (recvline[0] == 'c') {
-    //   received_question = 1;
-    // }
-
   }
   if (req == NULL)
     err_quit("str_cli: server terminated prematurely");
@@ -83,25 +66,6 @@ int isValidedInput(char *input, int len) {
 }
 
 int printRecvMessage(Request *req) {
-  // char *main_player_answer_fast_forward = "You must wait for others finish their answer";
-  // char *mp_after_anwsering_wrong_message = "Main player failed to victory!";
-  // char *mp_not_continue = "Main player decided to stop. Good bye!";
-
-  // if (strcmp(recvline, "mpaff") == 0) {
-  //   printf("%s\n", main_player_answer_fast_forward);
-  // } else if (strcmp(recvline, mp_after_anwsering_wrong_message) == 0) {
-  //   printf("%s\n", mp_after_anwsering_wrong_message);
-  //   return 0;
-  // } else if (recvline[0] == '8') {
-  //   printf("%s\n", mp_not_continue);
-  //   return 0;
-  // } else if (recvline[0] == '9') {
-  //   printf("%s%s\n", recvline+1, ". You decided a wrong answer. Good bye!");
-  //   return 0;
-  // } else {
-  //   printf("%s\n", recvline);
-  // }
-
   switch (req->type) {
     case 9: 
       // serv gui cau hoi
@@ -123,6 +87,11 @@ int printRecvMessage(Request *req) {
       // main player that bai
       printf("Right answer is %c. ", (char)req->num);
       printf("Main player failed in this question. %s\n", req->mess);
+      return 0;
+    case 15:
+      // tiep tuc hay dung choi
+      printf("Main player chosen to stop and take his %d$ reward\n", req->num);
+      printf("%s\n", req->mess);
       return 0;
   }
 
