@@ -63,14 +63,14 @@ tcpservpoll01:	tcpservpoll01.o
 tsigpipe:	tsigpipe.o
 		${CC} ${CFLAGS} -o $@ tsigpipe.o ${LIBS}
 
-projcli:	projcli.o
-		${CC} ${CFLAGS} -o $@ projcli.o ${LIBS}
+cli:	cli.o
+		${CC} ${CFLAGS} -o $@ cli.o ${LIBS}
 
-projcli1:	projcli1.o
-		${CC} ${CFLAGS} -o $@ projcli1.o ${LIBS}
+mcli:	mcli.o
+		${CC} ${CFLAGS} -o $@ mcli.o ${LIBS}
 
-projserv:	projserv.o sigchldwaitpid.o
-		${CC} ${CFLAGS} -o $@ projserv.o sigchldwaitpid.o ${LIBS}
+serv:	serv.o sigchldwaitpid.o
+		${CC} ${CFLAGS} -o $@ serv.o sigchldwaitpid.o ${LIBS}
 
 clean:
 		rm -f ${PROGS} ${CLEANFILES}
