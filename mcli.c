@@ -5,6 +5,7 @@ void cliProcess(FILE *fp, int sockfd);
 int isValidedInputForQuestion(char *input, int len);
 int isValidedInputForNavigation(char *input, int len);
 int printRecvMessage(Request *req);
+int calScore(int number_of_defeated_players);
 
 int main(int argc, char **argv)
 {
@@ -95,6 +96,7 @@ int printRecvMessage(Request *req) {
     case 9: 
       // serv gui cau hoi
       printf("\nThere are %d remaining players\n", req->num);
+      printf("You are having %d$ in reward\n", calScore(100-req->num));
       printf("%s\n", req->mess);
       printf("Your choice: ");
       break;
@@ -105,7 +107,7 @@ int printRecvMessage(Request *req) {
       break;
     case 12:
       // main player chien thang
-      printf("%s\n", req->mess);
+      printf("\n%s\n", req->mess);
       printf("All other players are defeated.\n");
       printf("Your reward: %d$\n", req->num);
       return 0;
@@ -127,4 +129,41 @@ int printRecvMessage(Request *req) {
   }
 
   return 1;
+}
+
+int calScore(int number_of_defeated_players) {
+  int n = number_of_defeated_players % 10;
+  switch (n) {
+    case 0:
+      return 100;
+      break;
+    case 1:
+      return 200;
+      break;
+    case 2:
+      return 400;
+      break;
+    case 3:
+      return 800;
+      break;
+    case 4:
+      return 1000;
+      break;
+    case 5:
+      return 2000;
+      break;
+    case 6:
+      return 4000;
+      break;
+    case 7:
+      return 8000;
+      break;
+    case 8:
+      return 10000;
+      break;
+    case 9:
+      return 20000;
+      break;
+  }
+  return 0;
 }

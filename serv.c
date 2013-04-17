@@ -7,7 +7,6 @@
 
 // TODO
 // kiem tra sendRequest, bao loi hoac gui lai
-// (int)score = score(number of defeated player);
 // phan tro giup, cuu ho
 
 // send mess
@@ -29,6 +28,7 @@ void processPlayerAnswer(int *remaining_players, char *player_anwsers, char righ
 void resetPlayerAnswers(char *player_anwsers, int len);
 
 int isMainPlayer(int sockfd, int main_player_sockfd);
+int calScore(int number_of_defeated_players);
 
 int main(int argc, char **argv)
 {
@@ -170,7 +170,7 @@ int main(int argc, char **argv)
                   }
                   if (req->mess[0] == 'n') {
                     // gameState = OFF;
-                    score = 100000;
+                    score = calScore(100- numberOfRemainingPlayers(remaining_players, FD_SETSIZE));
                     sendMainPlayerStopMessage(remaining_players, FD_SETSIZE, score);
                     // exit(0);
                     printf("Game closed!\n");
@@ -300,5 +300,41 @@ void sendMainPlayerStopMessage(int *remaining_players, int len, int score) {
     if (remaining_players[i] == ON) {
       sendRequest(i, 15, "Thank you! Goodbye.", score);
     }
+  }
+}
+
+int calScore(int number_of_defeated_players) {
+  int n = number_of_defeated_players % 10;
+  switch (n) {
+    case 0:
+      return 100;
+      break;
+    case 1:
+      return 200;
+      break;
+    case 2:
+      return 400;
+      break;
+    case 3:
+      return 800;
+      break;
+    case 4:
+      return 1000;
+      break;
+    case 5:
+      return 2000;
+      break;
+    case 6:
+      return 4000;
+      break;
+    case 7:
+      return 8000;
+      break;
+    case 8:
+      return 10000;
+      break;
+    case 9:
+      return 20000;
+      break;
   }
 }
