@@ -145,7 +145,7 @@ int main(int argc, char **argv)
               }
               break;
 
-            case TYPE_CLI_ANS:
+            case 8:
               // cli gui tra loi
               if (isMainPlayer(sockfd, main_player_sockfd)) {
                 if (numberOfRemainingPlayers(remaining_players, FD_SETSIZE) - numberOfAnwsers(player_anwsers, FD_SETSIZE) > 1) {

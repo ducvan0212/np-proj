@@ -70,9 +70,9 @@ void cliProcess(FILE *fp, int sockfd)
       }
       // consider request type !!!
       switch(sendline[0]){
-        case '1': printf("\nSend request 1"); break;
-        case '2': printf("\nSend request 2"); break;
-        case '3': printf("\nSend request 3"); break;
+        case 1: printf("\nSend request 1"); break;
+        case 2: printf("\nSend request 2"); break;
+        case 3: printf("\nSend request 3"); break;
       }
     } else if (req->type == 14) {
       while (isValidedInputForNavigation(sendline, MAXLINE) == 0) {

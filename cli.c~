@@ -47,7 +47,7 @@ void cliProcess(FILE *fp, int sockfd)
       Fgets(sendline, MAXLINE, fp);
     }
     printf("Submiting... Waiting for others...\n");
-    sendRequest(sockfd, TYPE_CLI_ANS, sendline, 0);
+    sendRequest(sockfd, 8, sendline, 0);
   }
   if (req == NULL)
     err_quit("str_cli: server terminated prematurely");
