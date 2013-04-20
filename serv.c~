@@ -117,13 +117,13 @@ int main(int argc, char **argv)
 			        printf("Error: Type invalid.\n");
 			        break;
             //TODO help implement 1
-            case TYPE_1_HELP_REQ: sendRequest(sockfd, TYPE_1_HELP_ANS, "1", 1);break
+            case TYPE_1_HELP_REQ: sendRequest(sockfd, TYPE_1_HELP_ANS, "1", score);break
 
             //TODO help implement 2
-            case TYPE_2_HELP_REQ: sendRequest(sockfd, TYPE_2_HELP_ANS, "2", 2);break
+            case TYPE_2_HELP_REQ: sendRequest(sockfd, TYPE_2_HELP_ANS, "2", score);break
 
             //TODO help implement 3
-            case TYPE_3_HELP_REQ: sendRequest(sockfd, TYPE_1_HELP_ANS, "3", 3);break
+            case TYPE_3_HELP_REQ: sendRequest(sockfd, TYPE_1_HELP_ANS, "3", score);break
 
             case 0:
               // cli gui ket noi, san sang choi

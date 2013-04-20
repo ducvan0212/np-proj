@@ -70,9 +70,9 @@ void cliProcess(FILE *fp, int sockfd)
       }
       // consider request type !!!
       switch(sendline[0]){
-        case '1': printf("\nPlayer choose 1st help"); CAN_FIRST_HELP  = FALSE; break;        
-        case '2': printf("\nPlayer choose 2nd help"); CAN_SECOND_HELP = FALSE; break;
-        case '3': printf("\nPlayer choose 3rd help"); CAN_THIRD_HELP  = FALSE; break;
+        case '1': printf("\nPlayer choose 1st help"); CAN_FIRST_HELP = FALSE; break;        
+        case '2': printf("\nPlayer choose 2nd help"); CAN_FIRST_HELP = FALSE; break;
+        case '3': printf("\nPlayer choose 3rd help"); CAN_FIRST_HELP = FALSE; break;
       }
     } else if (req->type == 14) {
       while (isValidedInputForNavigation(sendline, MAXLINE) == 0) {

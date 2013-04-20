@@ -1,9 +1,6 @@
 #ifndef REQUEST_H
 #define REQUEST_H
 
-#define TRUE  1
-#define FALSE 0
-
 #define TYPE_1_HELP_REQ 1
 #define TYPE_2_HELP_REQ 2
 #define TYPE_3_HELP_REQ 3
