@@ -1,7 +1,5 @@
 INSTALL:
-make serv
-make cli
-make mcli
+bash install.sh
 
 RUN:
 ./serv
