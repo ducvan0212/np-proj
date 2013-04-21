@@ -48,6 +48,7 @@ void cliProcess(FILE *fp, int sockfd) {
   char  sendline[MAXLINE], recvline[MAXLINE];
   int recv_bytes = 0;
   Request *req;
+  int reqType = 8;
   // int received_question = 0;
 
   printf("DAU TRUONG 100\n");
@@ -60,19 +61,29 @@ void cliProcess(FILE *fp, int sockfd) {
     Fgets(sendline, MAXLINE, fp);
 
     //TODO consider server messages    
-    if (req->type == 9 || req->type == 10
-      || req->type == TYPE_1_HELP_ANS
-      || req->type == TYPE_2_HELP_ANS
-      || req->type == TYPE_3_HELP_ANS) {
+    if (req->type == 9 || req->type == 10 
+      || req->type == TYPE_SERV_HELP_ANS) {
       while (isValidedInputForQuestion(sendline, MAXLINE) == 0) {
-        printf("Invalid input, reselect please\nYour choice: ");
+        printf("\nInvalid input, reselect please\nYour choice: ");
         Fgets(sendline, MAXLINE, fp);
       }
       // consider request type !!!
-      switch(sendline[0]){
-        case '1': printf("\nPlayer choose 1st help"); CAN_FIRST_HELP  = FALSE; break;        
-        case '2': printf("\nPlayer choose 2nd help"); CAN_SECOND_HELP = FALSE; break;
-        case '3': printf("\nPlayer choose 3rd help"); CAN_THIRD_HELP  = FALSE; break;
+      switch(sendline[0]) {
+        case '1': 
+          printf("\nPlayer choose 1st help\n"); 
+          reqType = TYPE_CLI_HELP;
+          break;
+        case '2': 
+          printf("\nPlayer choose 2nd help\n"); 
+          reqType = TYPE_CLI_HELP;
+          break;
+        case '3': 
+          printf("\nPlayer choose 3rd help\n"); 
+          reqType = TYPE_CLI_HELP;
+          break;
+        default:
+          printf("\nYour last answer is %c\n", sendline[0]);
+          reqType = TYPE_CLI_ANS;
       }
     } else if (req->type == 14) {
       while (isValidedInputForNavigation(sendline, MAXLINE) == 0) {
@@ -87,8 +98,7 @@ void cliProcess(FILE *fp, int sockfd) {
 
     printf("Submiting... Waiting for others...\n");
 
-    // send message
-    sendRequest(sockfd, TYPE_CLI_ANS, sendline, 0);
+    sendRequest(sockfd, reqType, sendline, 0);
   }
   if (req == NULL)
     err_quit("str_cli: server terminated prematurely");
@@ -125,14 +135,27 @@ void printHelp(){
 int printRecvMessage(Request *req) {
   switch (req->type) {
     //TODO consider help 1 2 3
-    case TYPE_1_HELP_ANS:
-    case TYPE_2_HELP_ANS:
-    case TYPE_3_HELP_ANS:
-      printf("%s\n", req->mess);
-      printHelp();
-      printf("\nYour choice: "); /*choice*/
+    case TYPE_SERV_HELP_ANS: 
+      if (req->mess[0] == '1') {
+        printf("1st help content\n");
+        CAN_FIRST_HELP  = FALSE;
+        printHelp();
+        printf("\nYour choice: ");
+        break;
+      } else if (req->mess[0] == '2') {
+        printf("2nd help content\n");
+        CAN_SECOND_HELP = FALSE; 
+        printHelp();
+        printf("\nYour choice: ");
+        break;
+      } else if (req->mess[0] == '3') {
+        printf("3rd help content\n");
+        CAN_THIRD_HELP  = FALSE; 
+        printHelp();
+        printf("\nYour choice: "); /*choice*/
+        break;
+      }
       break;
-
     case 9: 
       // serv gui cau hoi
       printf("\nThere are %d remaining players\n", req->num);

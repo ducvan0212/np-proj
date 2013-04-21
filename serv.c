@@ -120,17 +120,25 @@ int main(int argc, char **argv)
           //   Writen(sockfd, mp_not_continue, strlen(mp_not_continue)+1);
           // }
           switch (req->type) {
-            default:
-			        printf("Error: Type invalid.\n");
-			        break;
-            //TODO help implement 1
-            case TYPE_1_HELP_REQ: sendRequest(sockfd, TYPE_1_HELP_ANS, "1", 1);break;
-
-            //TODO help implement 2
-            case TYPE_2_HELP_REQ: sendRequest(sockfd, TYPE_2_HELP_ANS, "2", 2);break;
-
-            //TODO help implement 3
-            case TYPE_3_HELP_REQ: sendRequest(sockfd, TYPE_1_HELP_ANS, "3", 3);break;
+            case TYPE_CLI_HELP:
+              if (numberOfRemainingPlayers(remaining_players, FD_SETSIZE) - numberOfanswers(player_answers, FD_SETSIZE) > 1) {
+                sendRequest(sockfd, 10, "You must wait for others finish their answer", 0);
+                break;
+              }
+              if (req->mess[0] == '1') {
+                //TODO help implement 1
+                printf("main player chosen help 1\n");
+                sendRequest(sockfd, TYPE_SERV_HELP_ANS, "1", 0);
+              } else if (req->mess[0] == '2') {
+                //TODO help implement 2
+                printf("main player chosen help 2\n");
+                sendRequest(sockfd, TYPE_SERV_HELP_ANS, "2", 0);
+              } else if (req->mess[0] == '3') {
+                //TODO help implement 3
+                printf("main player chosen help 3\n");
+                sendRequest(sockfd, TYPE_SERV_HELP_ANS, "3", 0);
+              }
+              break;
 
             case 0:
               // cli gui ket noi, san sang choi
@@ -222,6 +230,10 @@ int main(int argc, char **argv)
               }
               printf("number of answers: %d\n", numberOfanswers(player_answers, FD_SETSIZE));
               break;
+
+            default:
+              printf("Error: Type invalid.\n");
+              break;              
             }
             free(req);
             printAllPlayerAnswer(player_answers, remaining_players, FD_SETSIZE);    

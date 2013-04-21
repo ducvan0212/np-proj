@@ -5,25 +5,19 @@
 #define FALSE 0
 
 // Request alias
-#define TYPE_1_HELP_REQ 1
-#define TYPE_2_HELP_REQ 2
-#define TYPE_3_HELP_REQ 3
+#define TYPE_CLI_HELP       1
+#define TYPE_SERV_HELP_ANS  2
 
-#define TYPE_1_HELP_ANS 4
-#define TYPE_2_HELP_ANS 5
-#define TYPE_3_HELP_ANS 6
-
-#define TYPE_CLI_ANS    8
+#define TYPE_CLI_ANS        8
 
 // request type 0: bat dau ket noi tu cli
 
-//         type 1: quyen giai thoat thu nhat
-//	       type 2: quyen giai thoat thu hai
-//         type 3: quyen giai thoat thu ba
+//         type 1: mcli xin quyen giai thoat 
 
-//         type 4: tra loi quyen giai thoat thu nhat (so nguoi cung dap an)
-//         type 5: tra loi quyen giai thoat thu hai  (dap an dung - dap an sai)
-//         type 6: tra loi quyen giai thoat thu ba   (dap an duoc nhieu nguoi chon nhat)
+//         type 2: serv tra loi quyen giai thoat 
+//            num 1: thu nhat (so nguoi cung dap an)
+//            num 2: tra loi quyen giai thoat thu hai  (dap an dung - dap an sai)
+//            num 3: tra loi quyen giai thoat thu ba   (dap an duoc nhieu nguoi chon nhat)
  
 //         type 8: cli gui tra loi cau hoi
 //         type 9: serv gui cau hoi
@@ -36,7 +30,7 @@
 
 //         type 14: tiep tuc hay dung choi
 //         type 15: main player chu dong dung choi
-//         type 16: khong cho nguoi cung choi choi
+//         type 16: khong cho them nguoi cung choi choi vi da du so nguoi
 
 typedef struct Request_t{
   int type;       // message type
