@@ -149,17 +149,17 @@ int main(int argc, char **argv)
               if (req->mess[0] == 'y') {
                 request_counter++;
                 remaining_players[sockfd] = ON;
-                player_anwsers[sockfd] = '0';
+                player_answers[sockfd] = '0';
                 if (TOTAL_PLAYERS < request_counter) {
                   remaining_players[sockfd] = OFF;
-                  player_anwsers[sockfd] = 0;
+                  player_answers[sockfd] = 0;
                   request_counter--;
                   sendRequest(sockfd, 16, "No more players can play. Sorry!", 0);
                   break;
                 }
                 if (TOTAL_PLAYERS == request_counter && main_player_sockfd == 0) {
                   remaining_players[sockfd] = OFF;
-                  player_anwsers[sockfd] = 0;
+                  player_answers[sockfd] = 0;
                   request_counter--;
                   sendRequest(sockfd, 16, "No more players can play. Sorry!", 0);  
                   break;
