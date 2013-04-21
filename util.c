@@ -1,5 +1,6 @@
 #include "util.h"
-#include "string.h"
+#include <string.h>
+#include <stdio.h>
 
 #define OFF 0
 #define ON  1
