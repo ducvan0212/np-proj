@@ -1,0 +1,10 @@
+INSTALL:
+bash install.sh
+
+RUN:
+./serv
+./cli  [IP]
+./mcli [IP]
+
+NOTES:
+turn off all client before turn off server
