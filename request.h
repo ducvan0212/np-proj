@@ -36,9 +36,11 @@ typedef struct Request_t{
   int type;       // message type
   char mess[100]; // message string
   int num;        // message number
+  int res[2];      // message request answer
 } Request;
 
 int sendRequest(int sockfd, int type, char *mess, int num);
+int sendHelp(int sockfd, int type, char *mess, int res1, int res2);
 Request *recvRequest(int sockfd);
 
 #endif

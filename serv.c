@@ -4,7 +4,7 @@
 
 #define TOTAL_PLAYERS 2
 #define OFF 0
-#define ON 1
+#define ON  1
 
 // TODO
 // kiem tra sendRequest, bao loi hoac gui lai
@@ -45,17 +45,15 @@ int main(int argc, char **argv)
   int main_player_sockfd = 0;
   // int game_state = ON;
   int question_counter = 0;
-  /*
-  char questions[3][100], correct_answers[3];
-  initQuestion(questions, correct_answers);
-  */
+ 
   char questions[3][100];
   char correct_answers[3];
 
+  //initQuestion(questions, correct_answers);
+  
   strcpy(questions[0], "cau hoi 1: 1+1=?\na.2\nb.3\nc.4"); correct_answers[0] = 'a';
   strcpy(questions[1], "cau hoi 2: 2+1=?\na.2\nb.3\nc.4"); correct_answers[1] = 'b';
   strcpy(questions[2], "cau hoi 3: 3+1=?\na.2\nb.3\nc.4"); correct_answers[2] = 'c';
-  //char correct_answers[3] = {'a', 'b', 'c'};
 
   char player_answers[FD_SETSIZE] = {0};
   int remaining_players[FD_SETSIZE] = {0};
@@ -63,13 +61,16 @@ int main(int argc, char **argv)
 
   listenfd = Socket(AF_INET, SOCK_STREAM, 0);
   
+  // init socket
   bzero(&servaddr, sizeof(servaddr));
   servaddr.sin_family = AF_INET;
   servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
   servaddr.sin_port = htons(SERV_PORT);
   
+  // bind
   Bind(listenfd, (SA *) &servaddr, sizeof(servaddr));
   
+  // listern to socket
   Listen(listenfd, LISTENQ);
   maxfd = listenfd;            /* initialize */
   maxi = -1;                   /* index into client[] array */
@@ -80,6 +81,7 @@ int main(int argc, char **argv)
   FD_ZERO(&allset);
   FD_SET(listenfd, &allset);
 
+  // server side
   for ( ; ; ) {
     rset = allset;          /* structure assignment */
     nready = Select(maxfd + 1, &rset, NULL, NULL, NULL);
@@ -126,17 +128,22 @@ int main(int argc, char **argv)
                 break;
               }
               if (req->mess[0] == '1') {
-                //TODO help implement 1
-                printf("main player chosen help 1\n");
-                sendRequest(sockfd, TYPE_SERV_HELP_ANS, "1", 0);
+                // help implement 1
+                // printf("main player chosen help 1 %c\n", req->mess[1]);
+                sendHelp(sockfd, TYPE_SERV_HELP_ANS, "1", req->mess[1], firstHelp(player_answers, req->mess[1], remaining_players, FD_SETSIZE));
               } else if (req->mess[0] == '2') {
-                //TODO help implement 2
-                printf("main player chosen help 2\n");
-                sendRequest(sockfd, TYPE_SERV_HELP_ANS, "2", 0);
+                // help implement 2
+                // printf("main player chosen help 2\n");
+                int *a = (int*)malloc(3*sizeof(int));
+                a = secondHelp(player_answers, correct_answers[question_counter], remaining_players, FD_SETSIZE);
+                if(a[0] == 1) sendHelp(sockfd, TYPE_SERV_HELP_ANS, "2", a[1], a[2]);
+                else          sendHelp(sockfd, TYPE_SERV_HELP_ANS, "2", 0, 0);
               } else if (req->mess[0] == '3') {
-                //TODO help implement 3
-                printf("main player chosen help 3\n");
-                sendRequest(sockfd, TYPE_SERV_HELP_ANS, "3", 0);
+                // help implement 3
+                // printf("main player chosen help 3\n");
+                int *ans = (int*)malloc(2*sizeof(int));
+                ans = thirdHelp(player_answers, remaining_players, FD_SETSIZE);
+                sendHelp(sockfd, TYPE_SERV_HELP_ANS, "3", ans[0], ans[1]);
               }
               break;
 
