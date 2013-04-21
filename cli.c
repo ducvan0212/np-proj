@@ -10,20 +10,24 @@ int main(int argc, char **argv)
   int sockfd;
   struct sockaddr_in  servaddr;
   
-  if (argc != 2)
-    err_quit("usage: tcpcli <IPaddress>");
+  // check IP
+  if (argc != 2) err_quit("usage: tcpcli <IPaddress>");
 
+  // get socket IPv4, data stream
   sockfd = Socket(AF_INET, SOCK_STREAM, 0);
 
+  // bind and connect
   bzero(&servaddr, sizeof(servaddr));
   servaddr.sin_family = AF_INET;
   servaddr.sin_port = htons(SERV_PORT);
   Inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
   Connect(sockfd, (SA *) &servaddr, sizeof(servaddr));
   
-  cliProcess(stdin, sockfd);    /* do it all */
+  // client side
+  cliProcess(stdin, sockfd);
 
-  exit(0);
+  // exit(0);
+  return 0;
 }
 
 void cliProcess(FILE *fp, int sockfd)
@@ -53,16 +57,13 @@ void cliProcess(FILE *fp, int sockfd)
     err_quit("str_cli: server terminated prematurely");
 }
 
-// 0 is invalid
 int isValidedInput(char *input, int len) {
   int input_len = strlen(input);
-  if ( input_len != 2) {
-    return 0;
-  }
-  if ((int)input[0] < (int)'a' || (int)input[0] > (int)'c') {
-    return 0;
-  }
-  return 1;
+
+  if ( input_len != 2) return FALSE;
+  if ((int)input[0] < (int)'a' || (int)input[0] > (int)'c') return FALSE;
+
+  return TRUE;
 }
 
 int printRecvMessage(Request *req) {

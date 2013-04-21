@@ -1,5 +1,6 @@
 #include "unp.h"
 #include "request.h"
+#include "util.h"
 
 #define TOTAL_PLAYERS 2
 #define OFF 0
@@ -11,24 +12,23 @@
 
 // send mess
 void sendQuestionToAll(int *client, char *message, int len, int number_of_remaining_players);
-void sendWrongAnswerMessage(int *remaining_players, char *player_anwsers, char right_answer, int len);
+void sendWrongAnswerMessage(int *remaining_players, char *player_answers, char right_answer, int len);
 void sendMainPlayerFailedMessage(int *remaining_players, int len, char right_answer);
 void sendMainPlayerStopMessage(int *remaining_players, int len, int score);
 
 // print serv log
 void printAllClient(int *client, int len);
-void printAllPlayerAnswer(char *player_anwsers, int *remaining_players, int len);
+void printAllPlayerAnswer(char *player_answers, int *remaining_players, int len);
 
 // calculate current state
-int numberOfAnwsers(char *player_anwsers, int len); 
+int numberOfanswers(char *player_answers, int len); 
 int numberOfRemainingPlayers(int *remaining_players, int len);
 
 // process player array
-void processPlayerAnswer(int *remaining_players, char *player_anwsers, char right_answer, int len);
-void resetPlayerAnswers(char *player_anwsers, int len);
+void processPlayerAnswer(int *remaining_players, char *player_answers, char right_answer, int len);
+void resetPlayerAnswers(char *player_answers, int len);
 
 int isMainPlayer(int sockfd, int main_player_sockfd);
-int calScore(int number_of_defeated_players);
 
 int main(int argc, char **argv)
 {
@@ -45,12 +45,19 @@ int main(int argc, char **argv)
   int main_player_sockfd = 0;
   // int game_state = ON;
   int question_counter = 0;
+  /*
+  char questions[3][100], correct_answers[3];
+  initQuestion(questions, correct_answers);
+  */
   char questions[3][100];
-  strcpy(questions[0], "cau hoi 1: 1+1=?\na.2\nb.3\nc.4");
-  strcpy(questions[1], "cau hoi 2: 2+1=?\na.2\nb.3\nc.4");
-  strcpy(questions[2], "cau hoi 3: 3+1=?\na.2\nb.3\nc.4");
-  char correct_anwsers[3] = {'a', 'b', 'c'};
-  char player_anwsers[FD_SETSIZE] = {0};
+  char correct_answers[3];
+
+  strcpy(questions[0], "cau hoi 1: 1+1=?\na.2\nb.3\nc.4"); correct_answers[0] = 'a';
+  strcpy(questions[1], "cau hoi 2: 2+1=?\na.2\nb.3\nc.4"); correct_answers[1] = 'b';
+  strcpy(questions[2], "cau hoi 3: 3+1=?\na.2\nb.3\nc.4"); correct_answers[2] = 'c';
+  //char correct_answers[3] = {'a', 'b', 'c'};
+
+  char player_answers[FD_SETSIZE] = {0};
   int remaining_players[FD_SETSIZE] = {0};
   Request *req;
 
@@ -117,20 +124,20 @@ int main(int argc, char **argv)
 			        printf("Error: Type invalid.\n");
 			        break;
             //TODO help implement 1
-            case TYPE_1_HELP_REQ: sendRequest(sockfd, TYPE_1_HELP_ANS, "1", 1);break
+            case TYPE_1_HELP_REQ: sendRequest(sockfd, TYPE_1_HELP_ANS, "1", 1);break;
 
             //TODO help implement 2
-            case TYPE_2_HELP_REQ: sendRequest(sockfd, TYPE_2_HELP_ANS, "2", 2);break
+            case TYPE_2_HELP_REQ: sendRequest(sockfd, TYPE_2_HELP_ANS, "2", 2);break;
 
             //TODO help implement 3
-            case TYPE_3_HELP_REQ: sendRequest(sockfd, TYPE_1_HELP_ANS, "3", 3);break
+            case TYPE_3_HELP_REQ: sendRequest(sockfd, TYPE_1_HELP_ANS, "3", 3);break;
 
             case 0:
               // cli gui ket noi, san sang choi
               if ((req->mess[0] == 'm') && (main_player_sockfd == 0)) {
                 main_player_sockfd = sockfd;
                 remaining_players[sockfd] = ON;
-                player_anwsers[sockfd] = '0';
+                player_answers[sockfd] = '0';
                 printf("Main player connected! Socket: %d\n", main_player_sockfd);
                 printAllClient(client, FD_SETSIZE);
                 request_counter++;
@@ -142,12 +149,12 @@ int main(int argc, char **argv)
               if (req->mess[0] == 'y') {
                 request_counter++;
                 remaining_players[sockfd] = ON;
-                player_anwsers[sockfd] = '0';
+                player_answers[sockfd] = '0';
                 if (TOTAL_PLAYERS == request_counter) {
                   sendQuestionToAll(client, questions[question_counter], FD_SETSIZE, numberOfRemainingPlayers(remaining_players, FD_SETSIZE));
                 }
                 printf("request_counter: %d sockfd: %d\n", request_counter, sockfd);
-                printf("afdafs\n");
+                //printf("afdafs\n");
                 printAllClient(client, FD_SETSIZE);
                 break;
               }
@@ -156,16 +163,16 @@ int main(int argc, char **argv)
             case TYPE_CLI_ANS:
               // cli gui tra loi
               if (isMainPlayer(sockfd, main_player_sockfd)) {
-                if (numberOfRemainingPlayers(remaining_players, FD_SETSIZE) - numberOfAnwsers(player_anwsers, FD_SETSIZE) > 1) {
+                if (numberOfRemainingPlayers(remaining_players, FD_SETSIZE) - numberOfanswers(player_answers, FD_SETSIZE) > 1) {
                   sendRequest(sockfd, 10, "You must wait for others finish their answer", 0);
                   break;
                 }
-                player_anwsers[sockfd] = req->mess[0];
-                if (req->mess[0] == correct_anwsers[question_counter]) {
-                  printf("number of anwsers: %d\n", numberOfAnwsers(player_anwsers, FD_SETSIZE));
-                  printAllPlayerAnswer(player_anwsers, remaining_players, FD_SETSIZE);
-                  processPlayerAnswer(remaining_players, player_anwsers, correct_anwsers[question_counter], FD_SETSIZE);
-                  sendWrongAnswerMessage(remaining_players, player_anwsers, correct_anwsers[question_counter], FD_SETSIZE);
+                player_answers[sockfd] = req->mess[0];
+                if (req->mess[0] == correct_answers[question_counter]) {
+                  printf("number of answers: %d\n", numberOfanswers(player_answers, FD_SETSIZE));
+                  printAllPlayerAnswer(player_answers, remaining_players, FD_SETSIZE);
+                  processPlayerAnswer(remaining_players, player_answers, correct_answers[question_counter], FD_SETSIZE);
+                  sendWrongAnswerMessage(remaining_players, player_answers, correct_answers[question_counter], FD_SETSIZE);
 
                   if (numberOfRemainingPlayers(remaining_players, FD_SETSIZE) == 1) {
                     // gameState = OFF;
@@ -174,7 +181,7 @@ int main(int argc, char **argv)
                     break;
                   }
 
-                  sendRequest(sockfd, 14, "Your anwser is right. Now, you can decide to go further or stop. (y/n) ", 0);
+                  sendRequest(sockfd, 14, "Your answer is right. Now, you can decide to go further or stop. (y/n) ", 0);
                   free(req);
                   req = recvRequest(sockfd);
                   if (req == NULL) {
@@ -190,20 +197,21 @@ int main(int argc, char **argv)
                   }
                   question_counter++;
                   request_counter = 0;
-                  resetPlayerAnswers(player_anwsers, FD_SETSIZE);
+                  resetPlayerAnswers(player_answers, FD_SETSIZE);
                   sendQuestionToAll(client, questions[question_counter], FD_SETSIZE, numberOfRemainingPlayers(remaining_players, FD_SETSIZE));
                 } else {
                   // gameState = OFF;
-                  sendMainPlayerFailedMessage(remaining_players, FD_SETSIZE, correct_anwsers[question_counter]);                  // exit(0);
+                  sendMainPlayerFailedMessage(remaining_players, FD_SETSIZE, correct_answers[question_counter]);                  
+                  // exit(0);
                 }
               } else {
-                player_anwsers[sockfd] = req->mess[0];
+                player_answers[sockfd] = req->mess[0];
               }
-              printf("number of anwsers: %d\n", numberOfAnwsers(player_anwsers, FD_SETSIZE));
+              printf("number of answers: %d\n", numberOfanswers(player_answers, FD_SETSIZE));
               break;
             }
             free(req);
-            printAllPlayerAnswer(player_anwsers, remaining_players, FD_SETSIZE);    
+            printAllPlayerAnswer(player_answers, remaining_players, FD_SETSIZE);    
           }
             
           if (--nready <= 0)
@@ -233,19 +241,19 @@ void printAllClient(int *client, int len) {
   }
 }
 
-void printAllPlayerAnswer(char *player_anwsers, int *remaining_players, int len) {
+void printAllPlayerAnswer(char *player_answers, int *remaining_players, int len) {
   int i;
   for (i = 0; i < len; ++i)
   {
     if (remaining_players[i] == ON)
-      printf("Client %d answer %c\n", i, player_anwsers[i]);
+      printf("Client %d answer %c\n", i, player_answers[i]);
   }
 }
 
-int numberOfAnwsers(char *player_anwsers, int len) {
+int numberOfanswers(char *player_answers, int len) {
   int c, number = 0;
   for (c = 4; c < len; c++) {
-    if (player_anwsers[c] >= 'a' && player_anwsers[c] <= 'c') {
+    if (player_answers[c] >= 'a' && player_answers[c] <= 'c') {
       number++;
     }
   }
@@ -262,10 +270,10 @@ int numberOfRemainingPlayers(int *remaining_players, int len) {
   return number;
 }
 
-void resetPlayerAnswers(char *player_anwsers, int len) {
+void resetPlayerAnswers(char *player_answers, int len) {
   int c;
   for (c = 4; c < len; c++) 
-    player_anwsers[c] = '0';
+    player_answers[c] = '0';
 }
 
 int isMainPlayer(int sockfd, int main_player_sockfd) {
@@ -276,20 +284,20 @@ int isMainPlayer(int sockfd, int main_player_sockfd) {
   return 0;
 }
 
-void processPlayerAnswer(int *remaining_players, char *player_anwsers, char right_answer, int len) {
+void processPlayerAnswer(int *remaining_players, char *player_answers, char right_answer, int len) {
   int i;
   for (i = 4; i < len; i++) {
-    if ((remaining_players[i] == ON) && (player_anwsers[i] != right_answer)) {
+    if ((remaining_players[i] == ON) && (player_answers[i] != right_answer)) {
       remaining_players[i] = OFF;
     }
   }
 }
 
-void sendWrongAnswerMessage(int *remaining_players, char *player_anwsers, char right_answer, int len) {
+void sendWrongAnswerMessage(int *remaining_players, char *player_answers, char right_answer, int len) {
   int i;
 
   for (i = 4; i < len; i++) {
-    if ((remaining_players[i] == OFF) && (player_anwsers[i] != right_answer)) {
+    if ((remaining_players[i] == OFF) && (player_answers[i] != right_answer)) {
       sendRequest(i, 11, "Thank you! Goodbye.", (int)right_answer);
     }
   }
@@ -312,41 +320,5 @@ void sendMainPlayerStopMessage(int *remaining_players, int len, int score) {
     if (remaining_players[i] == ON) {
       sendRequest(i, 15, "Thank you! Goodbye.", score);
     }
-  }
-}
-
-int calScore(int number_of_defeated_players) {
-  int n = number_of_defeated_players % 10;
-  switch (n) {
-    case 0:
-      return 100;
-      break;
-    case 1:
-      return 200;
-      break;
-    case 2:
-      return 400;
-      break;
-    case 3:
-      return 800;
-      break;
-    case 4:
-      return 1000;
-      break;
-    case 5:
-      return 2000;
-      break;
-    case 6:
-      return 4000;
-      break;
-    case 7:
-      return 8000;
-      break;
-    case 8:
-      return 10000;
-      break;
-    case 9:
-      return 20000;
-      break;
   }
 }

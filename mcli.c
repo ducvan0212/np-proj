@@ -1,6 +1,7 @@
 #include "unp.h"
 #include "request.h"
 #include "stdio.h"
+#include "util.h"
 
 int CAN_FIRST_HELP  = TRUE;
 int CAN_SECOND_HELP = TRUE;
@@ -19,32 +20,31 @@ int isValidedInputForNavigation(char *input, int len);
 /*print server message*/
 int printRecvMessage(Request *req);
 
-/*calculate score*/
-int calScore(int number_of_defeated_players);
-
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv){
   int sockfd;
   struct sockaddr_in  servaddr;
 
-  if (argc != 2)
-    err_quit("usage: tcpcli <IPaddress>");
+  // check IP
+  if (argc != 2) err_quit("usage: tcpcli <IPaddress>");
   	
+  // get socket IPv4, data stream
   sockfd = Socket(AF_INET, SOCK_STREAM, 0);
-
+  
+  // bind and connect
   bzero(&servaddr, sizeof(servaddr));
   servaddr.sin_family = AF_INET;
   servaddr.sin_port = htons(SERV_PORT);
   Inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
   Connect(sockfd, (SA *) &servaddr, sizeof(servaddr));
   
-  cliProcess(stdin, sockfd);    // do it all
+  // client side
+  cliProcess(stdin, sockfd);  
 
-  exit(0);
+  // exit(0); 
+  return 0;
 }
 
-void cliProcess(FILE *fp, int sockfd)
-{
+void cliProcess(FILE *fp, int sockfd) {
   char  sendline[MAXLINE], recvline[MAXLINE];
   int recv_bytes = 0;
   Request *req;
@@ -96,26 +96,22 @@ void cliProcess(FILE *fp, int sockfd)
 
 int isValidedInputForNavigation(char *input, int len) {
   int input_len = strlen(input);
-  if ( input_len != 2) {
-    return FALSE;
-  }
-  if (input[0] == 'y' || input[0] == 'n') {
-    return TRUE;
-  }
+
+  if ( input_len != 2) return FALSE;
+  if (input[0] == 'y' || input[0] == 'n') return TRUE;
+  
   return FALSE;
 }
 
 int isValidedInputForQuestion(char *input, int len) {
   int input_len = strlen(input);
-  if ( input_len != 2) {
-    return FALSE;
-  }
+
+  if ( input_len != 2) return FALSE;
   if ((int)input[0] == '1' && CAN_FIRST_HELP)  return TRUE;
   if ((int)input[0] == '2' && CAN_SECOND_HELP) return TRUE;
   if ((int)input[0] == '3' && CAN_THIRD_HELP)  return TRUE;
-  if ((int)input[0] >= (int)'a' && (int)input[0] <= (int)'c') {
-    return TRUE;
-  }
+  if ((int)input[0] >= (int)'a' && (int)input[0] <= (int)'c') return TRUE;
+
   return FALSE;
 }
 
@@ -143,7 +139,7 @@ int printRecvMessage(Request *req) {
       printf("You are having %d$ in reward\n", calScore(100-req->num));
       printf("%s\n", req->mess);
       printHelp();
-      printf("\nYour choice: "); /*choice*/
+      printf("\n\nYour choice: "); /*choice*/
       break;
     case 10:
       // main player tra loi cau hoi truoc khi 99 nguoi cung choi tra loi
@@ -155,12 +151,12 @@ int printRecvMessage(Request *req) {
       printf("\n%s\n", req->mess);
       printf("All other players are defeated.\n");
       printf("Your reward: %d$\n", req->num);
-      return 0;
+      return FALSE;
     case 13:
       // main player that bai
       printf("Right answer is %c. ", (char)req->num);
       printf("You failed in this question. %s\n", req->mess);
-      return 0;
+      return FALSE;
     case 14:
       // tiep tuc hay dung choi
       printf("%s\n", req->mess);
@@ -170,45 +166,8 @@ int printRecvMessage(Request *req) {
       // tiep tuc hay dung choi
       printf("You chosen to stop. Your reward: %d$\n", req->num);
       printf("%s\n", req->mess);
-      return 0;
+      return FALSE;
   }
 
-  return 1;
-}
-
-int calScore(int number_of_defeated_players) {
-  int n = number_of_defeated_players % 10;
-  switch (n) {
-    case 0:
-      return 100;
-      break;
-    case 1:
-      return 200;
-      break;
-    case 2:
-      return 400;
-      break;
-    case 3:
-      return 800;
-      break;
-    case 4:
-      return 1000;
-      break;
-    case 5:
-      return 2000;
-      break;
-    case 6:
-      return 4000;
-      break;
-    case 7:
-      return 8000;
-      break;
-    case 8:
-      return 10000;
-      break;
-    case 9:
-      return 20000;
-      break;
-  }
-  return 0;
+  return TRUE;
 }
