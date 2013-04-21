@@ -16,6 +16,7 @@ void printHelp();
 /*validate function*/
 int isValidedInputForQuestion(char *input, int len);
 int isValidedInputForNavigation(char *input, int len);
+int isValidInputForHelp(char *input, int len);
 
 /*print server message*/
 int printRecvMessage(Request *req);
@@ -63,7 +64,8 @@ void cliProcess(FILE *fp, int sockfd) {
     //TODO consider server messages    
     if (req->type == 9 || req->type == 10 
       || req->type == TYPE_SERV_HELP_ANS) {
-      while (isValidedInputForQuestion(sendline, MAXLINE) == 0) {
+      while (isValidedInputForQuestion(sendline, MAXLINE) == 0
+            && isValidInputForHelp(sendline, MAXLINE) == 0) {
         printf("\nInvalid input, reselect please\nYour choice: ");
         Fgets(sendline, MAXLINE, fp);
       }
@@ -72,8 +74,14 @@ void cliProcess(FILE *fp, int sockfd) {
         case '1': 
           printf("\nPlayer choose 1st help\n"); 
           reqType = TYPE_CLI_HELP;
-          //TODO get answer from main pla
-          sendline[1] = 'a';
+          //TODO get answer from main player
+          char buffer = sendline[0];
+          do{
+            printf("Your guess answer: ");
+            Fgets(sendline, MAXLINE, fp);
+          }while(isValidedInputForQuestion(sendline, MAXLINE) == FALSE);
+          sendline[1] = sendline[0];
+          sendline[0] = buffer;
           break;
         case '2': 
           printf("\nPlayer choose 2nd help\n"); 
@@ -120,10 +128,18 @@ int isValidedInputForQuestion(char *input, int len) {
   int input_len = strlen(input);
 
   if ( input_len != 2) return FALSE;
+  if ((int)input[0] >= (int)'a' && (int)input[0] <= (int)'c') return TRUE;
+
+  return FALSE;
+}
+
+int isValidInputForHelp(char *input, int len){
+  int input_len = strlen(input);
+
+  if ( input_len != 2) return FALSE;
   if ((int)input[0] == '1' && CAN_FIRST_HELP)  return TRUE;
   if ((int)input[0] == '2' && CAN_SECOND_HELP) return TRUE;
   if ((int)input[0] == '3' && CAN_THIRD_HELP)  return TRUE;
-  if ((int)input[0] >= (int)'a' && (int)input[0] <= (int)'c') return TRUE;
 
   return FALSE;
 }
@@ -147,7 +163,8 @@ int printRecvMessage(Request *req) {
         break;
       } else if (req->mess[0] == '2') {
         //consider help 2
-        printf("2 answer: %d - %d", req->res[0], req->res[1]);
+        if(req->res[0] == 0) printf("All player choose correct or incorrect answer.");
+        else                 printf("2 answer: %d - %d", req->res[0], req->res[1]);
         CAN_SECOND_HELP = FALSE; 
         printHelp();
         printf("\nYour choice: ");
