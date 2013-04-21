@@ -94,6 +94,10 @@ int printRecvMessage(Request *req) {
       printf("Main player chosen to stop and take his %d$ reward\n", req->num);
       printf("%s\n", req->mess);
       return 0;
+    case 16:
+      // nguoi choi bi tu choi vi da du so nguoi choi
+      printf("%s\n", req->mess);
+      return 0;
   }
 
   return 1;

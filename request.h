@@ -36,6 +36,7 @@
 
 //         type 14: tiep tuc hay dung choi
 //         type 15: main player chu dong dung choi
+//         type 16: khong cho nguoi cung choi choi
 
 typedef struct Request_t{
   int type;       // message type
