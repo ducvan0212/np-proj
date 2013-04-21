@@ -19,7 +19,7 @@ int isValidedInputForNavigation(char *input, int len);
 int isValidInputForHelp(char *input, int len);
 
 /*print server message*/
-int printRecvMessage(Request *req);
+int printRecvMessage(Request *req, int sockfd);
 
 int main(int argc, char **argv){
   int sockfd;
@@ -57,7 +57,7 @@ void cliProcess(FILE *fp, int sockfd) {
   sendRequest(sockfd, 0, "m", 0);
 
   while ((req = recvRequest(sockfd)) != NULL) {
-    if (printRecvMessage(req) == 0) break;
+    if (printRecvMessage(req, sockfd) == 0) break;
     
     Fgets(sendline, MAXLINE, fp);
 
@@ -151,7 +151,7 @@ void printHelp(){
 	if(CAN_THIRD_HELP)  printf("\n3. Trust the mob\nShow the most popular answer");
 }
 
-int printRecvMessage(Request *req) {
+int printRecvMessage(Request *req, int sockfd) {
   switch (req->type) {
     case TYPE_SERV_HELP_ANS: 
       if (req->mess[0] == '1') {
@@ -184,6 +184,10 @@ int printRecvMessage(Request *req) {
       printf("You are having %d$ in reward\n", calScore(100-req->num));
       printf("%s\n", req->mess);
       printHelp();
+      if ((req = recvRequest(sockfd)) == NULL) {
+        printf("server terminated");
+        return FALSE;
+      }
       printf("\n\nYour choice: "); /*choice*/
       break;
     case 10:

@@ -234,6 +234,9 @@ int main(int argc, char **argv)
                 }
               } else {
                 player_answers[sockfd] = req->mess[0];
+                if (numberOfRemainingPlayers(remaining_players, FD_SETSIZE) - numberOfanswers(player_answers, FD_SETSIZE) == 1) {
+                  sendRequest(main_player_sockfd, 10, "You must wait for others finish their answer", 0);
+                }
               }
               printf("number of answers: %d\n", numberOfanswers(player_answers, FD_SETSIZE));
               break;
