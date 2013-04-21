@@ -1,6 +1,9 @@
 #include "util.h"
 #include "string.h"
 
+#define OFF 0
+#define ON  1
+
 int calScore(int number_of_defeated_players) {
   int n = number_of_defeated_players % 10;
   switch (n) {
@@ -38,6 +41,52 @@ int calScore(int number_of_defeated_players) {
       return 0;
       break;
   }
+}
+
+int firstHelp(char *answers, char mainPlayerAnswer, int *remaining_players, int len){
+  int i, j;
+  j = 0;
+  for (i = 0; i < len; ++i)
+    if (remaining_players[i] == ON)
+      if(answers[i] == mainPlayerAnswer)
+        j++;
+  return j;
+}
+
+int* secondHelp(char *answers, char correctAnswer, int *remaining_players, int len){
+  int *j = (int*)malloc(3*sizeof(int));
+  j[0] = 0;  // invalid or not 
+  j[1] = 0;  // correct
+  j[2] = 0;  // incorrect
+
+  int i = 0;
+  for (i = 0; i < len; ++i)
+    if (remaining_players[i] == ON){
+      if(answers[i] == correctAnswer) j[1] = answers[i]; 
+      else if(answers[i] != correctAnswer) j[2] = answers[i];
+    }
+  if(j[1] != 0 && j[2] != 0) j[0] = 1;
+  printf("Check2: %d %d\n", j[1], j[2]); // fucking buggy ?
+  return j;
+}
+
+int* thirdHelp(char *answers, int *remaining_players, int len){
+  int *j = (int*)malloc(2*sizeof(int));
+  j[0] = 'a';
+  j[1] = 0;
+
+  int s[3] = {0,0,0};
+  int i = 0;
+  for (i = 0; i < len; ++i)
+    if (remaining_players[i] == ON){
+      s[answers[i] - 'a']++;
+      if(s[answers[i] - 'a'] > j[1]){
+        j[0] = answers[i];              
+        j[1] = s[answers[i] - 'a']; 
+      }
+    }
+  printf("Check3: %c %d\n", j[0], j[1]); // fucking buggy ?
+  return j;
 }
 
 void initQuestion(char **questions, char *answers){

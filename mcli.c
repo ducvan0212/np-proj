@@ -72,6 +72,8 @@ void cliProcess(FILE *fp, int sockfd) {
         case '1': 
           printf("\nPlayer choose 1st help\n"); 
           reqType = TYPE_CLI_HELP;
+          //TODO get answer from main pla
+          sendline[1] = 'a';
           break;
         case '2': 
           printf("\nPlayer choose 2nd help\n"); 
@@ -97,7 +99,8 @@ void cliProcess(FILE *fp, int sockfd) {
     }
 
     printf("Submiting... Waiting for others...\n");
-
+    
+    // send feed-back to server
     sendRequest(sockfd, reqType, sendline, 0);
   }
   if (req == NULL)
@@ -134,22 +137,24 @@ void printHelp(){
 
 int printRecvMessage(Request *req) {
   switch (req->type) {
-    //TODO consider help 1 2 3
     case TYPE_SERV_HELP_ANS: 
       if (req->mess[0] == '1') {
-        printf("1st help content\n");
+        // consider help 1
+        printf("Number mob chose %c is %d\n", req->res[0], req->res[1]);
         CAN_FIRST_HELP  = FALSE;
         printHelp();
         printf("\nYour choice: ");
         break;
       } else if (req->mess[0] == '2') {
-        printf("2nd help content\n");
+        //consider help 2
+        printf("2 answer: %d - %d", req->res[0], req->res[1]);
         CAN_SECOND_HELP = FALSE; 
         printHelp();
         printf("\nYour choice: ");
         break;
       } else if (req->mess[0] == '3') {
-        printf("3rd help content\n");
+        //consider help 3
+        printf("The most popular answer is %c with %d\n", req->res[0], req->res[1]);
         CAN_THIRD_HELP  = FALSE; 
         printHelp();
         printf("\nYour choice: "); /*choice*/

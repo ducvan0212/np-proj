@@ -11,10 +11,25 @@ int sendRequest(int sockfd, int type, char *mess, int num) {
   req->type = type;
   strcpy(req->mess, mess);
   req->num = num;
+
   sendbytes = send(sockfd, (char *)req, sizeof(*req), 0);
   // printf("%d %d\n", sizeof(char), sizeof(Request));
   free(req);
   // printf("sendbytes: %d\n", sendbytes);
+  return sendbytes;
+}
+
+int sendHelp(int sockfd, int type, char *mess, int res1, int res2){
+  Request *req = (Request *)malloc(sizeof(Request));
+  int sendbytes;
+
+  req->type = type;
+  strcpy(req->mess, mess);
+  req->res[0] = res1;
+  req->res[1] = res2;
+
+  sendbytes = send(sockfd, (char *)req, sizeof(*req), 0);
+  free(req);
   return sendbytes;
 }
 
