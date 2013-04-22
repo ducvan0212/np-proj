@@ -51,8 +51,9 @@ void cliProcess(FILE *fp, int sockfd) {
   Request *req;
   int reqType = 8;
   // int received_question = 0;
-
-  printf("DAU TRUONG 100\n");
+  printf("+----------------------------------------------------------------+\n");
+  printf("|                        DAU TRUONG 100                          |\n");
+  printf("+----------------------------------------------------------------+\n");
   printf("Waiting for other players connect to game...\n");
   sendRequest(sockfd, 0, "m", 0);
 
@@ -72,7 +73,7 @@ void cliProcess(FILE *fp, int sockfd) {
       // consider request type !!!
       switch(sendline[0]) {
         case '1': 
-          printf("\nPlayer choose 1st help\n"); 
+          printf("\nYou chose 1st help\n"); 
           reqType = TYPE_CLI_HELP;
           //TODO get answer from main player
           char buffer = sendline[0];
@@ -84,11 +85,11 @@ void cliProcess(FILE *fp, int sockfd) {
           sendline[0] = buffer;
           break;
         case '2': 
-          printf("\nPlayer choose 2nd help\n"); 
+          printf("\nYou chose 2nd help\n"); 
           reqType = TYPE_CLI_HELP;
           break;
         case '3': 
-          printf("\nPlayer choose 3rd help\n"); 
+          printf("\nYou chose 3rd help\n"); 
           reqType = TYPE_CLI_HELP;
           break;
         default:
@@ -105,8 +106,6 @@ void cliProcess(FILE *fp, int sockfd) {
     else {
       printf("Cannot reach here. Something wrongs\n");
     }
-
-    printf("Submiting... Waiting for others...\n");
     
     // send feed-back to server
     sendRequest(sockfd, reqType, sendline, 0);
@@ -145,10 +144,22 @@ int isValidInputForHelp(char *input, int len){
 }
 
 void printHelp(){
-	if(CAN_FIRST_HELP||CAN_SECOND_HELP||CAN_THIRD_HELP) printf("\n--- HELP HELP HELP ! ---");
-	if(CAN_FIRST_HELP)  printf("\n1. Poll the mob \nPlayer choose an answer, show number of mob choose the same");
-	if(CAN_SECOND_HELP) printf("\n2. Ask the mob  \nShow 1 incorrect, 1 correct answer."); //  If no one correct, not shown this option
-	if(CAN_THIRD_HELP)  printf("\n3. Trust the mob\nShow the most popular answer");
+	if(CAN_FIRST_HELP||CAN_SECOND_HELP||CAN_THIRD_HELP) 
+    printf("\n+----------------------- HELP HELP HELP ! -----------------------+");
+  if(CAN_FIRST_HELP) {  
+    printf("\n| 1. Poll the mob                                                |");
+    printf("\n|    Player choose an answer, show number of mob choose the same |");
+  }
+  if(CAN_SECOND_HELP) { 
+    printf("\n| 2. Ask the mob                                                 |");
+    printf("\n|    Show 1 incorrect, 1 correct answer.                         |"); //  If no one correct, not shown this option
+  }
+  if(CAN_THIRD_HELP) {
+    printf("\n| 3. Trust the mob                                               |");
+    printf("\n|    Show the most popular answer                                |");
+  }
+  if(CAN_FIRST_HELP||CAN_SECOND_HELP||CAN_THIRD_HELP) 
+    printf("\n+----------------------------------------------------------------+");
 }
 
 int printRecvMessage(Request *req, int sockfd) {
@@ -159,22 +170,22 @@ int printRecvMessage(Request *req, int sockfd) {
         printf("Number mob chose %c is %d\n", req->res[0], req->res[1]);
         CAN_FIRST_HELP  = FALSE;
         printHelp();
-        printf("\nYour choice: ");
+        printf("\n\nYour choice: ");
         break;
       } else if (req->mess[0] == '2') {
         //consider help 2
         if(req->res[0] == 0) printf("All player choose correct or incorrect answer.");
-        else                 printf("2 answer: %d - %d", req->res[0], req->res[1]);
+        else                 printf("2 answer: %d - %d\n", req->res[0], req->res[1]);
         CAN_SECOND_HELP = FALSE; 
         printHelp();
-        printf("\nYour choice: ");
+        printf("\n\nYour choice: ");
         break;
       } else if (req->mess[0] == '3') {
         //consider help 3
         printf("The most popular answer is %c with %d\n", req->res[0], req->res[1]);
         CAN_THIRD_HELP  = FALSE; 
         printHelp();
-        printf("\nYour choice: "); /*choice*/
+        printf("\n\nYour choice: "); /*choice*/
         break;
       }
       break;
@@ -184,11 +195,12 @@ int printRecvMessage(Request *req, int sockfd) {
       printf("You are having %d$ in reward\n", calScore(100-req->num));
       printf("%s\n", req->mess);
       printHelp();
+      printf("\nWaiting for answers of others ...\n");
       if ((req = recvRequest(sockfd)) == NULL) {
-        printf("server terminated");
+        printf("server terminated\n");
         return FALSE;
       }
-      printf("\n\nYour choice: "); /*choice*/
+      printf("\nYour choice: "); /*choice*/
       break;
     case 10:
       // main player tra loi cau hoi truoc khi 99 nguoi cung choi tra loi
@@ -208,12 +220,12 @@ int printRecvMessage(Request *req, int sockfd) {
       return FALSE;
     case 14:
       // tiep tuc hay dung choi
-      printf("%s\n", req->mess);
+      printf("%s\n\n", req->mess);
       printf("Your choice: ");
       break;
     case 15:
       // tiep tuc hay dung choi
-      printf("You chosen to stop. Your reward: %d$\n", req->num);
+      printf("You chose to stop. Your reward: %d$\n", req->num);
       printf("%s\n", req->mess);
       return FALSE;
   }

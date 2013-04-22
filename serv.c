@@ -129,18 +129,18 @@ int main(int argc, char **argv)
               }
               if (req->mess[0] == '1') {
                 // help implement 1
-                // printf("main player chosen help 1 %c\n", req->mess[1]);
+                // printf("main player chose help 1 %c\n", req->mess[1]);
                 sendHelp(sockfd, TYPE_SERV_HELP_ANS, "1", req->mess[1], firstHelp(player_answers, req->mess[1], remaining_players, FD_SETSIZE));
               } else if (req->mess[0] == '2') {
                 // help implement 2
-                // printf("main player chosen help 2\n");
+                // printf("main player chose help 2\n");
                 int *a = (int*)malloc(3*sizeof(int));
                 a = secondHelp(player_answers, correct_answers[question_counter], remaining_players, FD_SETSIZE);
                 if(a[0] == 1) sendHelp(sockfd, TYPE_SERV_HELP_ANS, "2", a[1], a[2]);
                 else          sendHelp(sockfd, TYPE_SERV_HELP_ANS, "2", 0, 0);
               } else if (req->mess[0] == '3') {
                 // help implement 3
-                // printf("main player chosen help 3\n");
+                // printf("main player chose help 3\n");
                 int *ans = (int*)malloc(2*sizeof(int));
                 ans = thirdHelp(player_answers, remaining_players, FD_SETSIZE);
                 sendHelp(sockfd, TYPE_SERV_HELP_ANS, "3", ans[0], ans[1]);
@@ -235,7 +235,7 @@ int main(int argc, char **argv)
               } else {
                 player_answers[sockfd] = req->mess[0];
                 if (numberOfRemainingPlayers(remaining_players, FD_SETSIZE) - numberOfanswers(player_answers, FD_SETSIZE) == 1) {
-                  sendRequest(main_player_sockfd, 10, "You must wait for others finish their answer", 0);
+                  sendRequest(main_player_sockfd, 17, "You can answer", 0);
                 }
               }
               printf("number of answers: %d\n", numberOfanswers(player_answers, FD_SETSIZE));

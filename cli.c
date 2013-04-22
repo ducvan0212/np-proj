@@ -36,7 +36,9 @@ void cliProcess(FILE *fp, int sockfd)
   Request *req;
   // int received_question = 0;
 
-  printf("DAU TRUONG 100\n");
+  printf("+------------------------------------+\n");
+  printf("|            DAU TRUONG 100          |\n");
+  printf("+------------------------------------+\n");
   printf("Waiting for other players connect to game...\n");
   sendRequest(sockfd, 0, "y", 0);
 
