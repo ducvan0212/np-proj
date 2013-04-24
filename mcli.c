@@ -175,7 +175,7 @@ int printRecvMessage(Request *req, int sockfd) {
       } else if (req->mess[0] == '2') {
         //consider help 2
         if(req->res[0] == 0) printf("All player choose correct or incorrect answer.");
-        else                 printf("2 answer: %d - %d\n", req->res[0], req->res[1]);
+        else                 printf("2 answer: %c - %c\n", req->res[0], req->res[1]);
         CAN_SECOND_HELP = FALSE; 
         printHelp();
         printf("\n\nYour choice: ");

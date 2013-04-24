@@ -54,7 +54,7 @@ int firstHelp(char *answers, char mainPlayerAnswer, int *remaining_players, int 
   return j;
 }
 
-int* secondHelp(char *answers, char correctAnswer, int *remaining_players, int len){
+int* secondHelp(char *answers, char correctAnswer, int *remaining_players, int main_player_sockfd, int len){
   int *j = (int*)malloc(3*sizeof(int));
   j[0] = 0;  // invalid or not 
   j[1] = 0;  // correct
@@ -63,11 +63,14 @@ int* secondHelp(char *answers, char correctAnswer, int *remaining_players, int l
   int i = 0;
   for (i = 0; i < len; ++i)
     if (remaining_players[i] == ON){
-      if(answers[i] == correctAnswer) j[1] = answers[i]; 
-      else if(answers[i] != correctAnswer) j[2] = answers[i];
+      if(i == main_player_sockfd) continue;
+      if(answers[i] == correctAnswer) 
+        j[1] = answers[i]; 
+      else                            
+        j[2] = answers[i];
     }
   if(j[1] != 0 && j[2] != 0) j[0] = 1;
-  printf("Check2: %d %d\n", j[1], j[2]); // fucking buggy ?
+  printf("Check2: %c %c\n", j[1], j[2]);
   return j;
 }
 
@@ -86,7 +89,7 @@ int* thirdHelp(char *answers, int *remaining_players, int len){
         j[1] = s[answers[i] - 'a']; 
       }
     }
-  printf("Check3: %c %d\n", j[0], j[1]); // fucking buggy ?
+  // printf("Check3: %c %d\n", j[0], j[1]);
   return j;
 }
 
