@@ -2,7 +2,7 @@
 #include "request.h"
 #include "util.h"
 
-#define TOTAL_PLAYERS 2
+#define TOTAL_PLAYERS 3
 #define OFF 0
 #define ON  1
 
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
                 // help implement 2
                 // printf("main player chose help 2\n");
                 int *a = (int*)malloc(3*sizeof(int));
-                a = secondHelp(player_answers, correct_answers[question_counter], remaining_players, FD_SETSIZE);
+                a = secondHelp(player_answers, correct_answers[question_counter], remaining_players, main_player_sockfd, FD_SETSIZE);
                 if(a[0] == 1) sendHelp(sockfd, TYPE_SERV_HELP_ANS, "2", a[1], a[2]);
                 else          sendHelp(sockfd, TYPE_SERV_HELP_ANS, "2", 0, 0);
               } else if (req->mess[0] == '3') {
